@@ -19,7 +19,6 @@ https://github.com/zfcsoftware/puppeteer-real-browser/assets/123484092/bd8ca2b0-
  ![Contributors](https://img.shields.io/github/contributors/zfcsoftware/puppeteer-real-browser?color=dark-green) ![Forks](https://img.shields.io/github/forks/zfcsoftware/puppeteer-real-browser?style=social) ![Stargazers](https://img.shields.io/github/stars/zfcsoftware/puppeteer-real-browser?style=social) ![Issues](https://img.shields.io/github/issues/zfcsoftware/puppeteer-real-browser) ![License](https://img.shields.io/github/license/zfcsoftware/puppeteer-real-browser) 
 
 
-
 ## Installation
 
 If you are using a Linux operating system, xvfb must be installed for the library to work correctly.
@@ -39,7 +38,7 @@ sudo apt-get install xvfb
 
 ## Include
 
-### CommanJS
+### CommonJS
 
 ```js
 
@@ -179,7 +178,8 @@ Distributed under the MIT License. See [LICENSE](https://github.com/zfcsoftware/
 
 ## Thank You
 
-* **Alptekin Gülcan** - [alpgul](https://github.com/alpgul) - *Contributed to targetFilter function*
+* **Skill Issue™** - [TheFalloutOf76](https://github.com/TheFalloutOf76) - *The library had stopped working on Linux servers and proxies with high spam scores. Thanks to the plugin he developed, this problem was solved. Thanks to him *
+
 * **Jimmy Laurent** - [Jimmy Laurent](https://github.com/JimmyLaurent) - *Inspired by cloudflare-scraper library*
 * **CrispyyBaconx** - [CrispyyBaconx](https://github.com/CrispyyBaconx) - *Contributed to converting this library to Typescript*
 * **Pavle Aleksic** - [pavlealeksic](https://github.com/pavlealeksic) - *We change the fingerprint with the puppeteer-afp library.*

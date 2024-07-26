@@ -1,10 +1,7 @@
 import { startSession, closeSession } from "./module/chromium.js";
-import puppeteer from "puppeteer-extra";
-import { notice, sleep } from "./module/general.js";
+import { sleep } from "./module/general.js";
 import { checkStat } from "./module/turnstile.js";
-import { protectPage, protectedBrowser } from "puppeteer-afp";
-import { puppeteerRealBrowser } from "./module/old.js";
-export { puppeteerRealBrowser };
+import { protectPage } from "puppeteer-afp";
 
 async function handleNewPage({ page, config = {} }) {
   // fp(page);
@@ -30,6 +27,8 @@ export const connect = ({
     var global_target_status = false;
 
     function targetFilter({ target, skipTarget }) {
+      if (target.type() === "page") return true;
+
       try {
         if (turnstile === true && target._getTargetInfo().type == "iframe")
           return false;
@@ -55,19 +54,23 @@ export const connect = ({
       global_target_status = status;
     };
 
-    const { chromeSession, chrome, xvfbsession } = await startSession({
+    customConfig = {
+      ...customConfig,
+      ...connectOption,
+      targetFilter: (target) =>
+        targetFilter({ target: target, skipTarget: skipTarget }),
+    };
+    args.push(
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-blink-features=AutomationControlled",
+      "--window-size=1920,1080"
+    );
+    const { browser, xvfbsession } = await startSession({
       args: args,
       headless: headless,
       customConfig: customConfig,
       proxy: proxy,
-    });
-
-      const browser = await puppeteer.connect({
-        // target is auto loaded
-      targetFilter: (target) =>
-        targetFilter({ target: target, skipTarget: skipTarget }),
-      browserWSEndpoint: chromeSession.browserWSEndpoint,
-      ...connectOption,
     });
 
     var page = await browser.pages();
@@ -109,7 +112,7 @@ export const connect = ({
       autoSolve({ page: page, browser: browser });
     }
 
-    await page.setUserAgent(chromeSession.agent);
+    // await page.setUserAgent(chromeSession.agent);
 
     await page.setViewport({
       width: 1920,
@@ -117,16 +120,15 @@ export const connect = ({
     });
 
     browser.on("disconnected", async () => {
-      notice({
-        message: "Browser Disconnected",
-        type: "info",
-      });
+      // notice({
+      //     message: 'Browser Disconnected',
+      //     type: 'info'
+      // })
       try {
         setSolveStatus({ status: false });
       } catch (err) {}
       await closeSession({
         xvfbsession: xvfbsession,
-        chrome: chrome,
       }).catch((err) => {
         console.log(err.message);
       });
@@ -136,7 +138,7 @@ export const connect = ({
       var newPage = await target.page();
 
       try {
-        await newPage.setUserAgent(chromeSession.agent);
+        // await newPage.setUserAgent(chromeSession.agent);
       } catch (err) {
         // console.log(err.message);
       }
@@ -165,7 +167,6 @@ export const connect = ({
       browser: browser,
       page: page,
       xvfbsession: xvfbsession,
-      chrome: chrome,
       setTarget: setTarget,
     });
   });

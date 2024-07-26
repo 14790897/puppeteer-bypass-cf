@@ -1,21 +1,15 @@
-import { launch } from "chrome-launcher";
-import chromium from "@sparticuz/chromium";
-import CDP from "chrome-remote-interface";
-import axios from "axios";
 import Xvfb from "xvfb";
 import { notice, slugify } from "./general.js";
+import puppeteer from "puppeteer";
+const __dirname = import.meta.dirname;
 
-export const closeSession = async ({ xvfbsession, chrome }) => {
+export const closeSession = async ({ xvfbsession }) => {
   if (xvfbsession) {
     try {
       xvfbsession.stopSync();
     } catch (err) {}
   }
-  if (chrome) {
-    try {
-      await chrome.kill();
-    } catch (err) {}
-  }
+
   return true;
 };
 
@@ -29,24 +23,26 @@ export const startSession = ({
     try {
       var xvfbsession = null;
       var chromePath =
-        customConfig.executablePath || customConfig.chromePath || chromium.path;
+        customConfig.executablePath ||
+        customConfig.chromePath ||
+        puppeteer.executablePath();
 
-    //   if (slugify(process.platform).includes("linux") && headless === false) {
-    //     notice({
-    //       message:
-    //         "This library is stable with headless: true in linuxt environment and headless: false in Windows environment. Please send headless: 'auto' for the library to work efficiently.",
-    //       type: "error",
-    //     });
-    //   } else if (
-    //     slugify(process.platform).includes("win") &&
-    //     headless === true
-    //   ) {
-    //     notice({
-    //       message:
-    //         "This library is stable with headless: true in linuxt environment and headless: false in Windows environment. Please send headless: 'auto' for the library to work efficiently.",
-    //       type: "error",
-    //     });
-    //   }
+      if (slugify(process.platform).includes("linux") && headless === false) {
+        notice({
+          message:
+            "This library is stable with headless: true in linuxt environment and headless: false in Windows environment. Please send headless: 'auto' for the library to work efficiently.",
+          type: "error",
+        });
+      } else if (
+        slugify(process.platform).includes("win") &&
+        headless === true
+      ) {
+        notice({
+          message:
+            "This library is stable with headless: true in linuxt environment and headless: false in Windows environment. Please send headless: 'auto' for the library to work efficiently.",
+          type: "error",
+        });
+      }
 
       if (headless === "auto") {
         headless = slugify(process.platform).includes("linux") ? true : false;
@@ -56,7 +52,7 @@ export const startSession = ({
         "--no-sandbox",
         "--disable-setuid-sandbox",
         "--disable-blink-features=AutomationControlled",
-        // "--window-size=1920,1080",
+        "--window-size=1920,1080",
       ].concat(args);
 
       if (headless === true) {
@@ -86,27 +82,35 @@ export const startSession = ({
         }
       }
 
-      var chrome = await launch({
-        chromePath,
-        chromeFlags,
+      const EXTENSION_PATH = `${__dirname}/extension/`;
+      chromeFlags.push(`--disable-extensions-except=${EXTENSION_PATH}`);
+      chromeFlags.push(`--load-extension=${EXTENSION_PATH}`);
+
+      const browser = await puppeteer.launch({
+        headless: false, // Since it is in the testing phase, headless fixed is used and will be updated with the incoming value in the future.
+        executablePath: chromePath,
+        args: chromeFlags,
         ...customConfig,
       });
+      // var chrome = await launch({
+      //     chromePath,
+      //     chromeFlags,
+      //     ...customConfig
+      // });
 
-      var chromeSession = await axios
-        .get("http://localhost:" + chrome.port + "/json/version")
-        .then((response) => {
-          response = response.data;
-          return {
-            browserWSEndpoint: response.webSocketDebuggerUrl,
-            agent: response["User-Agent"],
-          };
-        })
-        .catch((err) => {
-          throw new Error(err.message);
-        });
+      // var chromeSession = await axios.get('http://localhost:' + chrome.port + '/json/version')
+      //     .then(response => {
+      //         response = response.data
+      //         return {
+      //             browserWSEndpoint: response.webSocketDebuggerUrl,
+      //             agent: response['User-Agent']
+      //         }
+      //     })
+      //     .catch(err => {
+      //         throw new Error(err.message)
+      //     })
       return resolve({
-        chromeSession: chromeSession,
-        chrome: chrome,
+        browser,
         xvfbsession: xvfbsession,
       });
     } catch (err) {
