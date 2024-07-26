@@ -1,5 +1,5 @@
 {
-  "name": "puppeteer-real-browser",
+  "name": "puppeteer-bypass-cf",
   "version": "1.2.20",
   "description": "This package is designed to bypass puppeteer's bot-detecting captchas such as Cloudflare. It acts like a real browser and can be managed with puppeteer.",
   "type": "module",
@@ -26,7 +26,7 @@
     "puppeteer-undetect-cf",
     "puppeteer-undetectable-cf-bypass"
   ],
-  "author": "zfc-software",
+  "author": "liuweiqing",
   "license": "ISC",
   "dependencies": {
     "@sparticuz/chromium": "^119.0.2",
